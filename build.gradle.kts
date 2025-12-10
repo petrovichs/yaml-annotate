@@ -19,7 +19,7 @@ repositories {
 dependencies {
     intellijPlatform {
         // Target IntelliJ IDEA Ultimate (IU) instead of Community (IC)
-        create("IU", "2024.3")
+        create("IU", "2023.3")
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
@@ -30,9 +30,9 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            // Понижаем минимально поддерживаемую версию IDE до 243,
-            // чтобы плагин был совместим с текущей установленной версией IU-243
-            sinceBuild = "243"
+            // Понижаем минимально поддерживаемую версию IDE до 233,
+            // чтобы плагин был совместим с текущей установленной версией IU-233
+            sinceBuild = "233"
         }
 
         changeNotes = """
@@ -44,13 +44,26 @@ intellijPlatform {
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        // IntelliJ IDEA 2023.3 runs on Java 17. Classes must target 17 to be loadable.
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        // Align Kotlin bytecode target with IDE runtime
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
+}
+
+// Also ensure toolchains use Java 17 for compilation
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
